@@ -15,8 +15,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: flutter build
-        #run: flutter build web --dart-define=FLUTTER_WEB_USE_SKIA=true
-        run: flutter build web
+        run: flutter build web --web-renderer canvaskit
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:

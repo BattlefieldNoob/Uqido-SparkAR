@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:uqido_sparkar/blocs/sparkar_bloc.actions.dart';
 import 'package:uqido_sparkar/blocs/sparkar_bloc.dart';
-import 'package:uqido_sparkar/view/common/home_loading_bar.dart';
 import 'package:uqido_sparkar/view/common/search_app_bar.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -22,20 +22,35 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         },
         //Will show when SEARCH MODE wasn't active
         mainAppBar: (stream, keyword) {
-          return AppBar(
-              title: const Text('Uqido Spark AR'),
+          return NeumorphicAppBar(
+              title: NeumorphicText(
+                'Uqido Spark AR',
+                style: NeumorphicStyle(color: Colors.grey),
+                textStyle: NeumorphicTextStyle(fontSize: 25),
+              ),
               actions: [
-                IconButton(
+                //NeumorphicButton(
+                //  onPressed: () {
+                //    final neumorphicTheme = NeumorphicTheme.of(context);
+                //    if (neumorphicTheme!.isUsingDark) {
+                //      neumorphicTheme.themeMode = ThemeMode.light;
+                //    } else {
+                //      neumorphicTheme.themeMode = ThemeMode.dark;
+                //    }
+                //  },
+                //  style: NeumorphicStyle(boxShape: NeumorphicBoxShape.circle()),
+                //  child: NeumorphicIcon(Icons.invert_colors,
+                //      size: 32, style: NeumorphicStyle(color: Colors.grey)),
+                //),
+                NeumorphicButton(
                   onPressed: () {
                     stream.add(true);
                   },
-                  icon: const Icon(Icons.search),
-                ),
-                const SizedBox(
-                  width: 10,
+                  style: NeumorphicStyle(boxShape: NeumorphicBoxShape.circle()),
+                  child: NeumorphicIcon(Icons.search,
+                      size: 32, style: NeumorphicStyle(color: Colors.grey)),
                 )
-              ],
-              bottom: HomeLoadingBar());
+              ]);
         });
   }
 }

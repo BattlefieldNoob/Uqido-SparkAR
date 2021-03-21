@@ -30,7 +30,8 @@ class _DesktopNavigationRailState extends State<DesktopNavigationRail> {
   Widget build(BuildContext context) {
     return NavigationRail(
         destinations: widget.destinations,
-        elevation: 4,
+        backgroundColor: Color(0xFF3E3E3E),
+        elevation: 0,
         minWidth: 92,
         extended: widget.isTablet ? false : extended,
         minExtendedWidth: 350,

@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:functional_widget_annotation/functional_widget_annotation.dart';
 import 'package:uqido_sparkar/model/sparkar_effect.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'effect_visibility_status.dart';
 
@@ -25,11 +25,12 @@ class EffectListItem extends StatelessWidget {
       child: ListTile(
         dense: false,
         contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-        leading: Image.network(
+        leading: Neumorphic(
+            child: Image.network(
           effect.iconUrl,
           width: 48,
           height: 48,
-        ),
+        )),
         title: Text(effect.name),
         subtitle: EffectVisibilityStatus(effect.submissionStatus,
             effect.visibilityStatus, effect.isDeprecated),
@@ -52,29 +53,16 @@ class EffectListItem extends StatelessWidget {
 Widget clickableIcon(BuildContext context, IconData icon, String url,
     {bool enabled = true, bool primary = true}) {
   var enabledColor = Theme.of(context).accentColor;
-  return OutlinedButton(
-      style: OutlinedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          side: enabled
-              ? BorderSide(width: 3, color: enabledColor)
-              : const BorderSide(width: 3, color: disabledColor),
-          backgroundColor: primary
-              ? enabled
-                  ? enabledColor
-                  : disabledColor
-              : null,
-          minimumSize: const Size(54, 54)),
-      child: Center(
-          child: Icon(icon, color: enabled ? Colors.white70 : Colors.white30)),
-      onPressed: enabled ? () => launch(url) : null);
+
+  return NeumorphicButton(
+    child: NeumorphicIcon(icon,
+        size: 32,
+        style: NeumorphicStyle(color: enabled ? Colors.grey : Colors.black38)),
+    onPressed: enabled ? () => print("pressed!") : null,
+  );
 }
 
 @swidget
 Widget effectCardScaffold({required Widget child}) {
-  return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      elevation: 3,
-      child: child);
+  return Neumorphic(margin: EdgeInsets.symmetric(vertical: 8), child: child);
 }

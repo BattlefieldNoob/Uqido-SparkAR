@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 
-typedef AppBarCallback = AppBar Function(
+typedef AppBarCallback = PreferredSizeWidget Function(
     StreamController<bool> stream, String searching);
 
 class SearchAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -25,7 +26,7 @@ class SearchAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.searchHint = "Search here...",
     required this.mainAppBar,
     required this.onSubmit,
-    this.searchFontSize = 20,
+    this.searchFontSize = 18,
   });
 
   @override
@@ -98,50 +99,56 @@ class SearchAppBarBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      leading: InkWell(child: BackButton(
+    return NeumorphicAppBar(
+      leading: NeumorphicButton(
+        style: NeumorphicStyle(boxShape: NeumorphicBoxShape.circle()),
+        child: NeumorphicIcon(Icons.arrow_back,
+            size: 32, style: NeumorphicStyle(color: Colors.grey)),
         onPressed: () {
           stream.add(false);
           widget.onSubmit("");
         },
-      )),
-      backgroundColor: widget.primary,
+      ),
       title: Align(
         alignment: Alignment.centerRight,
         child: ConstrainedBox(
           constraints: const BoxConstraints.tightFor(width: 500),
-          child: TextField(
-            controller: queryController,
-            autofocus: true,
-            onSubmitted: (String value) {
-              //stream.add(false);
-              widget.onSubmit(value);
-            },
-            style: TextStyle(
-              fontSize: widget.searchFontSize,
-              color: widget.mainTextColor,
-            ),
-            cursorColor: widget.mainTextColor,
-            decoration: InputDecoration(
-              hintText: widget.searchHint,
-              border: InputBorder.none,
-              hintStyle: TextStyle(
-                color: widget.mainTextColor.withAlpha(100),
+          child: Neumorphic(
+              style: NeumorphicStyle(
+                depth: -2,
               ),
-            ),
-          ),
+              padding: EdgeInsets.all(4),
+              child: TextField(
+                controller: queryController,
+                autofocus: true,
+                onSubmitted: (String value) {
+                  //stream.add(false);
+                  widget.onSubmit(value);
+                },
+                style: TextStyle(
+                  fontSize: widget.searchFontSize,
+                  color: widget.mainTextColor,
+                ),
+                cursorColor: widget.mainTextColor,
+                decoration: InputDecoration(
+                  hintText: widget.searchHint,
+                  border: InputBorder.none,
+                  hintStyle: TextStyle(
+                    color: widget.mainTextColor.withAlpha(100),
+                  ),
+                ),
+              )),
         ),
       ),
       actions: [
-        IconButton(
+        NeumorphicButton(
+          style: NeumorphicStyle(boxShape: NeumorphicBoxShape.circle()),
           onPressed: () {
             //stream.add(true);
             widget.onSubmit(queryController.text);
           },
-          icon: const Icon(Icons.search),
-        ),
-        const SizedBox(
-          width: 10,
+          child: NeumorphicIcon(Icons.search,
+              size: 32, style: NeumorphicStyle(color: Colors.grey)),
         )
       ],
     );
