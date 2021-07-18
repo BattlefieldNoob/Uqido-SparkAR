@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:uqido_sparkar/db/abstract_db.dart';
 import 'package:uqido_sparkar/model/sparkar_user.dart';
 import 'package:uqido_sparkar/utils/facebook_password_encrypt_util.dart';
@@ -42,13 +41,14 @@ BbWXekxzuZqxHmt/YECtUAodpn7EbRR8jzEnDyVQvqw+/q59gv4dOBkCAwEAAQ==
   Future<List<Map<String, dynamic>>> getDataFromNetlify(
       String encryptedEmail, String encryptedPassword) async {
     //if (kReleaseMode) {
-    final response = await http.get(Uri.https(
-        'sparkar-token-crawler.netlify.app',
-        '.netlify/functions/sparkar_fetch',
-        {"encemail": encryptedEmail, "encpass": encryptedPassword}));
+    final response = await Dio().get(
+        'https://sparkar-token-crawler.netlify.app/.netlify/functions/sparkar_fetch',
+        queryParameters: {
+          "encemail": encryptedEmail,
+          "encpass": encryptedPassword
+        });
 
-    final data = jsonDecode(response.body) as List<dynamic>;
-    return data.map((e) => e as Map<String, dynamic>).toList();
+    return response.data.map((e) => e as Map<String, dynamic>).toList();
     /*} else {
       final body = FAKE_DATA;
       final data = jsonDecode(body) as List<dynamic>;

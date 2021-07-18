@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:uqido_sparkar/db/rest_client.dart';
 import 'package:webcrypto/webcrypto.dart';
 
 class EncryptedLoginData {
@@ -13,10 +14,11 @@ class EncryptedLoginData {
 
 Future<EncryptedLoginData> getEncryptedPasswordAndLoginData(
     String unencryptedPassword) async {
+  final RestClient client = RestClient(Dio());
+
   //get public keys for encrypt
-  var encryptdata = await Dio().get(
-      'https://sparkar-token-crawler.netlify.app/.netlify/functions/facebook_public_keys');
-  var data = encryptdata.data;
+  var encryptdata = await client.getPublicKeys();
+  var data = encryptdata;
 
   var encpass = await _passwordEncrypt(unencryptedPassword, data);
 

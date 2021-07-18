@@ -5,6 +5,7 @@ import 'dart:core';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:uqido_sparkar/db/abstract_db.dart';
+import 'package:uqido_sparkar/db/rest_client.dart';
 import 'package:uqido_sparkar/model/sparkar_effect.dart';
 import 'package:uqido_sparkar/model/sparkar_user.dart';
 import 'package:uqido_sparkar/utils/facebook_password_encrypt_util.dart';
@@ -12,7 +13,7 @@ import 'package:uqido_sparkar/utils/facebook_password_encrypt_util.dart';
 class SparkARDB with DBCache implements AbstractDB {
   static final SparkARDB _instance = SparkARDB._internal();
 
-  static final Dio dio = Dio();
+  static final RestClient client = RestClient(Dio());
 
   SparkARDB._internal();
 
@@ -37,12 +38,11 @@ class SparkARDB with DBCache implements AbstractDB {
         final encpass = loginData.encpass;
         final lsd = loginData.lsd;
         print(encpass);
-        var cookies = await dio.get(
-            'https://sparkar-token-crawler.netlify.app/.netlify/functions/facebook_get_cookie',
-            queryParameters: {'encpass': encpass, 'lsd': lsd, 'email': email});
+        var cookies =
+            await client.getCookiesWithEncryptedLoginData(encpass, lsd, email!);
 
         print(cookies);
-        return [cookies.data as Map<String, dynamic>];
+        return [cookies as Map<String, dynamic>];
       }, customCacheDuration: Duration(days: 3)))
           .first;
 
@@ -74,16 +74,12 @@ class SparkARDB with DBCache implements AbstractDB {
 
   Future<List<Map<String, dynamic>>> getUsersAndEffectsByNetlify(
       String cookie) async {
-    //print("getUsersAndEffects");
-    //print(cookieAndToken);
-    var url =
-        'https://sparkar-token-crawler.netlify.app/.netlify/functions/facebook_get_users_and_effects';
-    final response = await dio.get(url, queryParameters: {'cookie': cookie});
+    final response = await client.getUsersAndEffectWithCookie(cookie);
 
     //print("Print data");
     //print(response.data);
     //final data = jsonDecode(response.data) as List<dynamic>;
-    final data = response.data['data'] as List<dynamic>;
+    final data = response['data'] as List<dynamic>;
     //final cookie = response.data['cookie'] as List<dynamic>;
     //print(data);
     var list = data.map((e) => e as Map<String, dynamic>).toList();
@@ -96,23 +92,6 @@ class SparkARDB with DBCache implements AbstractDB {
     print("getUsersAndEffectsByRequest");
     print(cookie);
     print(token);
-    final headers = {
-      //'headers': {
-      //'cookie': '',
-      'authority': ' www.facebook.com',
-      'accept': ' */*',
-      'accept-language': ' en-US,en;q=0.9,it;q=0.8',
-      'content-type': 'application/x-www-form-urlencoded',
-      // 'cookie': cookies,
-      'origin': ' https://www.facebook.com',
-      'referer': ' https://www.facebook.com/sparkarhub/effects/',
-      'sec-fetch-dest': ' empty',
-      'sec-fetch-mode': ' cors',
-      'sec-fetch-site': ' same-origin',
-      'user-agent':
-          ' Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36'
-      // }
-    };
     var body = {'doc_id': '', 'variables': '{}', 'fb_dtsg': '', '__a': 1};
     body['doc_id'] = '2737348616365573';
     body['variables'] = '{}';
@@ -123,17 +102,11 @@ class SparkARDB with DBCache implements AbstractDB {
 
     final cookies = baseCookies + cookie;
 
-    headers['cookie'] = cookies;
-    const url = 'https://www.facebook.com/api/graphql/';
-
-    final effectQuery =
-        await Dio().post(url, data: body, options: Options(headers: headers));
+    final effectQuery = await client.facebookRequest(body, cookies);
 
     print(effectQuery);
 
-    print(effectQuery.data.runtimeType);
-
-    var parsed = jsonDecode(effectQuery.data);
+    var parsed = jsonDecode(effectQuery);
 
     var owners = parsed['data']['ar_hub_effects_query']['ar_hub_settings']
         ['owners'] as List<dynamic>;
@@ -152,23 +125,7 @@ class SparkARDB with DBCache implements AbstractDB {
   Future<List<SparkARUser>> getEffectsForUsers(
       List<SparkARUser> usersList, cookie, token) async {
     final usersAndEffects = List<SparkARUser>.empty(growable: true);
-    final headers = {
-      //'headers': {
-      //'cookie': '',
-      'authority': ' www.facebook.com',
-      'accept': ' */*',
-      'accept-language': ' en-US,en;q=0.9,it;q=0.8',
-      'content-type': 'application/x-www-form-urlencoded',
-      // 'cookie': cookies,
-      'origin': ' https://www.facebook.com',
-      'referer': ' https://www.facebook.com/sparkarhub/effects/',
-      'sec-fetch-dest': ' empty',
-      'sec-fetch-mode': ' cors',
-      'sec-fetch-site': ' same-origin',
-      'user-agent':
-          ' Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36'
-      // }
-    };
+
     var body = {'doc_id': '', 'variables': '{}', 'fb_dtsg': '', '__a': 1};
     body['doc_id'] = '3625110550842914';
     body['variables'] = '{}';
@@ -179,19 +136,15 @@ class SparkARDB with DBCache implements AbstractDB {
 
     final cookies = baseCookies + cookie;
 
-    headers['cookie'] = cookies;
-
-    const url = 'https://www.facebook.com/api/graphql/';
-
     for (final user in usersList) {
       final variables =
           '{"selectedOwnerID":"${user.id}","filters":{"effect_name_contains_ci":"","visibility_statuses":[],"review_statuses":[],"surfaces":[],"exclude_surfaces":["AR_ADS"]},"orderby":["LAST_MODIFIED_TIME_DESC"]}';
       body['variables'] = variables;
-      final effectQuery =
-          await Dio().post(url, data: body, options: Options(headers: headers));
+
+      final effectQuery = await client.facebookRequest(body, cookies);
 
       print("EFFECTSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
-      var parsed = jsonDecode(effectQuery.data);
+      var parsed = jsonDecode(effectQuery);
       print(parsed);
       final effects =
           parsed['data']['ar_hub_effects_query']['owner']['effects'];

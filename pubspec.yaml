@@ -31,11 +31,10 @@ dependencies:
   responsive_framework: ^0.1.0
   adaptive_breakpoints: ^0.0.2
   animations: ^2.0.0
-  http: ^0.13.0
-  dio: ^4.0.0
   webcrypto:
     path: ./webcrypto
   encrypt: ^5.0.0-beta.1
+  retrofit: ^2.0.0-beta1
   flutter_login: ^2.0.0-nullsafety.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -48,8 +47,30 @@ dev_dependencies:
     sdk: flutter
   functional_widget: ^0.9.0
   freezed: ^0.14.0-nullsafety.0
+  retrofit_generator: ^2.0.0-beta3
   build_runner: ^1.11.0
   json_serializable: ^4.0.2
+
+dependency_overrides:
+
+  #webcrypto:
+  #  git:
+  #    url: git://github.com/tauu/webcrypto.dart.git
+  #    ref: "6831b9e682823b61ebacb706e032883e420d9840"
+  #    path: .
+
+  functional_widget_annotation:
+    git:
+      url: git://github.com/tim-smart/functional_widget.git
+      ref: "ad7f47788160137fe17c9038ab0298e89b4a6f34" # https://github.com/rrousselGit/functional_widget/pull/86
+      path: packages/functional_widget_annotation
+
+  functional_widget:
+    git:
+      url: git://github.com/tim-smart/functional_widget.git
+      ref: "ad7f47788160137fe17c9038ab0298e89b4a6f34" # https://github.com/rrousselGit/functional_widget/pull/86
+      path: packages/functional_widget
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
